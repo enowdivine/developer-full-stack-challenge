@@ -22,7 +22,7 @@
             medium
             class="mt-4"
             ><template v-slot:cell(actions)="{ item }">
-                <span><b-button v-b-modal.modal-4 class="bg-success" @click="updateAuthor(item)">Edit</b-button></span>
+                <span><b-button v-b-modal.modal-4 class="bg-success" @click="updateModal(item)">Edit</b-button></span>
                 <span><b-btn @click="deteleAuthor(item)" class="bg-danger">Delete</b-btn></span>
             </template></b-table
         >
@@ -37,12 +37,12 @@
 
         <!-- Edit Author Modal -->
         <div>
-            <b-modal id="modal-4" title="Edit Author">
+            <b-modal id="modal-4" title="Edit Author" @ok="updateAuthor">
                 <b-form @submit="updateAuthor">
                     <b-form-group id="input-group-1" label="Author Name:" label-for="input-1">
                         <b-form-input
                             id="input-1"
-                            v-model="form.author_name"
+                            v-model="updateForm.author_name"
                             placeholder="Enter author name"
                             required
                         ></b-form-input>
@@ -61,30 +61,27 @@ export default {
     },
     data() {
         return {
+            // Table Data
             perPage: 3,
             currentPage: 1,
             rows: 1,
             fields: ['id', 'author_name', 'number_of_books', 'actions'],
-            authors: [
-                { id: 1, author_name: 'Fred', number_of_books: 'Flintstone' },
-                { id: 2, author_name: 'Wilma', number_of_books: 'Flintstone' },
-                { id: 3, author_name: 'Barney', number_of_books: 'Rubble' },
-                { id: 4, author_name: 'Betty', number_of_books: 'Rubble' },
-                { id: 5, author_name: 'Pebbles', number_of_books: 'Flintstone' },
-                { id: 6, author_name: 'Bamm Bamm', number_of_books: 'Rubble' },
-                { id: 7, author_name: 'The Great', number_of_books: 'Gazzoo' },
-                { id: 8, author_name: 'Rockhead', number_of_books: 'Slate' },
-                { id: 9, author_name: 'Pearl', number_of_books: 'Slaghoople' },
-            ],
+            authors: [],
+            // Form Data
             form: {
                 author_name: '',
                 number_of_books: 0,
+            },
+            updateForm: {
+                author_name: '',
             },
             filter: null,
             output: null,
         };
     },
     mounted() {
+        this.getAuthors();
+        this.authors = this.$store.state.authors;
         this.rows = this.authors.length;
     },
     methods: {
@@ -92,11 +89,29 @@ export default {
             this.rows = filteredItems.length;
             this.currentPage = 1;
         },
-        updateAuthor(author) {
-            console.log(author);
+        async getAuthors() {
+            // const response = await this.$axios.get('/authors');
+            // this.$store.commit('ALL_AUTHORS', response.data);
         },
-        deteleAuthor(author) {
-            console.log(author);
+        async updateModal(author) {
+            this.updateForm.author_name = author.author_name;
+        },
+        async updateAuthor() {
+            const data = {
+                id: author.id,
+                author_name: this.updateForm.author_name,
+            };
+            console.log(data);
+            // const response = await this.$axios.update(`/update-author/${data.id}`, data);
+            // console.log(response);
+        },
+        async deteleAuthor(author) {
+            const data = {
+                id: author.id,
+            };
+            // const response = await this.$axios.delete(`/delete-author/${data.id}`);
+            // console.log(response);
+            this.$store.commit('DELETE_AUTHOR', data);
         },
     },
 };

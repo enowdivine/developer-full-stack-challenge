@@ -1,7 +1,13 @@
 <template>
     <b-form @submit="onSubmit" v-if="show">
         <b-form-group id="input-group-2" label="Your Name:" label-for="input-2">
-            <b-form-input id="input-2" v-model="form.name" placeholder="Enter name" required></b-form-input>
+            <b-form-input
+                id="input-2"
+                v-model="form.username"
+                placeholder="Enter name"
+                autocomplete
+                required
+            ></b-form-input>
         </b-form-group>
 
         <b-form-group>
@@ -26,16 +32,16 @@ export default {
     data() {
         return {
             form: {
-                name: '',
+                username: '',
                 password: '',
             },
-
             show: true,
         };
     },
     methods: {
         onSubmit(event) {
             event.preventDefault();
+            console.log(this.form.username, this.form.password);
             this.$router.push({ path: 'books' });
         },
     },

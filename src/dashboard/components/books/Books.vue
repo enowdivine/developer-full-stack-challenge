@@ -22,7 +22,7 @@
             medium
             class="mt-4"
             ><template v-slot:cell(actions)="{ item }">
-                <span><b-button v-b-modal.modal-2 class="bg-success" @click="updateBook(item)">Edit</b-button></span>
+                <span><b-button v-b-modal.modal-2 class="bg-success" @click="updateModal(item)">Edit</b-button></span>
                 <span><b-btn @click="deteleBook(item)" class="bg-danger">Delete</b-btn></span>
             </template></b-table
         >
@@ -37,7 +37,7 @@
 
         <!-- Edit Book Modal -->
         <div>
-            <b-modal id="modal-2" title="Edit Book">
+            <b-modal id="modal-2" title="Edit Book" @ok="updateBook">
                 <b-form @submit="updateBook">
                     <b-form-group id="input-group-1" label="Book Name:" label-for="input-1">
                         <b-form-input
@@ -85,27 +85,15 @@ export default {
     },
     data() {
         return {
+            // Table Data
             perPage: 3,
             currentPage: 1,
             rows: 1,
             fields: ['id', 'book_name', 'author_name', 'number_of_pages', 'actions'],
-            books: [
-                {
-                    id: 1,
-                    book_name: 'Fred',
-                    author_name: 'Flintstone',
-                    number_of_pages: 23,
-                },
-                { id: 2, book_name: 'Wilma', author_name: 'Flintstone', number_of_pages: 23 },
-                { id: 3, book_name: 'Barney', author_name: 'Rubble', number_of_pages: 23 },
-                { id: 4, book_name: 'Betty', author_name: 'Rubble', number_of_pages: 23 },
-                { id: 5, book_name: 'Pebbles', author_name: 'Flintstone', number_of_pages: 23 },
-                { id: 6, book_name: 'Bamm Bamm', author_name: 'Rubble', number_of_pages: 23 },
-                { id: 7, book_name: 'The Great', author_name: 'Gazzoo', number_of_pages: 23 },
-                { id: 8, book_name: 'Rockhead', author_name: 'Slate', number_of_pages: 23 },
-                { id: 9, book_name: 'Pearl', author_name: 'Slaghoople', number_of_pages: 23 },
-            ],
+            books: [],
+            // Form Data
             form: {
+                id: '',
                 book_name: '',
                 author_name: '',
                 number_of_pages: 0,
@@ -115,6 +103,8 @@ export default {
         };
     },
     mounted() {
+        this.getBooks();
+        this.books = this.$store.state.books;
         this.rows = this.books.length;
     },
     methods: {
@@ -122,11 +112,34 @@ export default {
             this.rows = filteredItems.length;
             this.currentPage = 1;
         },
-        updateBook(book) {
-            console.log(book);
+        async getBooks() {
+            // const response = await this.$axios.get('/books');
+            // this.$store.commit('ALL_BOOKS', response.data);
+        },
+        async updateModal(book) {
+            this.form.id = book.id;
+            this.form.book_name = book.book_name;
+            this.form.author_name = book.author_name;
+            this.form.number_of_pages = book.number_of_pages;
+        },
+        async updateBook() {
+            const data = {
+                id: this.form.id,
+                book_name: this.form.book_name,
+                author_name: this.form.author_name,
+                number_of_pages: this.form.number_of_pages,
+            };
+            console.log(data);
+            // const response = await this.$axios.update(`/update-author/${data.id}`, data);
+            // console.log(response);
         },
         deteleBook(book) {
-            console.log(book);
+            const data = {
+                id: book.id,
+            };
+            // const response = await this.$axios.delete(`/delete-book/${data.id}`);
+            // console.log(response);
+            this.$store.commit('DELETE_BOOK', data);
         },
     },
 };

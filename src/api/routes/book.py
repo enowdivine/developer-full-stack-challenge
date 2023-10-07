@@ -43,8 +43,8 @@ def update_book(book: BookSchema, bookId: int):
 
 
 @book_router.delete("/delete-book/{bookId}")
-def delete_book(booksTable: BookSchema, bookId: int):
-    connection.execute(book.delete().where(booksTable.c.id == bookId))
+def delete_book(book: BookSchema, bookId: int):
+    connection.execute(booksTable.delete().where(booksTable.c.id == bookId))
     return connection.execute(
         booksTable.select().where(
             booksTable.c.id == bookId,
