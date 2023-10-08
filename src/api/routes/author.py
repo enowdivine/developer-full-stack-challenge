@@ -10,6 +10,7 @@ from . import utils
 author_router = APIRouter()
 
 
+# Get all authors from database
 @author_router.get("/authors")
 def fetch_author(user: UserSchema = Depends(get_current_active_user)):
     cursor = connection.cursor()
@@ -22,11 +23,11 @@ def fetch_author(user: UserSchema = Depends(get_current_active_user)):
     return data
 
 
+# Get books for a particular author based on author id
 @author_router.get("/author-books/{author_id}")
 def number_of_books_per_author(
     author_id, user: UserSchema = Depends(get_current_active_user)
 ):
-    # author_id = payload["id"]
     cursor = connection.cursor()
     result = cursor.execute(
         f"""
@@ -37,6 +38,7 @@ def number_of_books_per_author(
     return data
 
 
+# Add new author to database
 @author_router.post("/add-author", response_model=AuthorSchema)
 def add_author(
     payload: AuthorSchema, user: UserSchema = Depends(get_current_active_user)
@@ -57,6 +59,7 @@ def add_author(
     }
 
 
+# Update author name and also reflect changes on the books table
 @author_router.put("/update-author")
 def update_author(
     payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)
@@ -82,6 +85,7 @@ def update_author(
     return {"author_name": author_name}
 
 
+# Delect author from databse
 @author_router.delete("/delete-author")
 def delete_author(
     payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)

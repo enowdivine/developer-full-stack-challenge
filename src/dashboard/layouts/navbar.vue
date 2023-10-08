@@ -7,6 +7,7 @@
                 <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
                 <b-collapse id="nav-collapse" is-nav>
+                    <!-- Page navigation links -->
                     <b-navbar-nav>
                         <b-nav-item href="books">Books</b-nav-item>
                         <b-nav-item href="authors">Authors</b-nav-item>

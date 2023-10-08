@@ -5,11 +5,7 @@ from datetime import datetime, timedelta
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from routes.utils import get_all_users
-
-# schemas
 from schemas.user import UserSchema
-
-# from schemas.author import AuthorSchema
 
 SECRET_KEY = "27b530ab123a1262f8e1f2392b7513b1b5adad2a95803ef49d81d7cfaa6d6f24"
 ALGORITHM = "HS256"

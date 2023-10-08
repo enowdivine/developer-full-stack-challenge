@@ -10,6 +10,7 @@ from . import utils
 book_router = APIRouter()
 
 
+# Get all books from database
 @book_router.get("/books")
 def fetch_books(user: UserSchema = Depends(get_current_active_user)):
     cursor = connection.cursor()
@@ -22,6 +23,7 @@ def fetch_books(user: UserSchema = Depends(get_current_active_user)):
     return data
 
 
+# Add book to database
 @book_router.post("/add-book", response_model=BookSchema)
 def add_book(payload: BookSchema, user: UserSchema = Depends(get_current_active_user)):
     print(payload)
@@ -47,6 +49,7 @@ def add_book(payload: BookSchema, user: UserSchema = Depends(get_current_active_
     }
 
 
+# Update single book from database
 @book_router.put("/update-book")
 def update_book(
     payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)
@@ -73,6 +76,7 @@ def update_book(
     }
 
 
+# Delete book from database
 @book_router.delete("/delete-book")
 def delete_book(
     payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)

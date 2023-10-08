@@ -52,6 +52,7 @@ export default {
         this.getAuthors();
     },
     methods: {
+        // Add new book to database function
         async onSubmit(event) {
             event.preventDefault();
             if (this.form.book_name && this.form.author) {

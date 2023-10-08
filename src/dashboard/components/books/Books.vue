@@ -81,7 +81,7 @@ export default {
     data() {
         return {
             // Table Data
-            perPage: 3,
+            perPage: 6,
             currentPage: 1,
             rows: 1,
             fields: ['id', 'book_name', 'author_name', 'number_of_pages', 'actions'],
@@ -148,11 +148,14 @@ export default {
             }
         },
 
+        // Function to set initial variables for a book during update
         async updateModal(book) {
             this.form.id = book.id;
             this.form.book_name = book.book_name;
             this.form.number_of_pages = book.number_of_pages;
         },
+
+        // Function to update single book
         async updateBook() {
             try {
                 const data = {

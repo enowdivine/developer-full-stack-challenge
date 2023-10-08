@@ -62,11 +62,12 @@ export default {
     data() {
         return {
             // Table Data
-            perPage: 3,
+            perPage: 6,
             currentPage: 1,
             rows: 1,
             fields: ['id', 'author_name', 'number_of_books', 'actions'],
             authors: [],
+
             // Form Data
             form: {
                 author_id: '',
