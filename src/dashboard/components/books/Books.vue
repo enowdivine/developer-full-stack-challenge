@@ -48,13 +48,12 @@
                         ></b-form-input>
                     </b-form-group>
 
-                    <b-form-group id="input-group-2" label="Author Name:" label-for="input-2">
-                        <b-form-input
-                            id="input-2"
-                            v-model="form.author_name"
-                            placeholder="Enter author name"
-                            required
-                        ></b-form-input>
+                    <b-form-group id="input-group-3" label="Author Name:" label-for="input-3">
+                        <b-form-select v-model="form.author">
+                            <option v-for="item in authors" :key="item.id" v-bind:value="{ item }">
+                                {{ item.author_name }}
+                            </option>
+                        </b-form-select>
                     </b-form-group>
 
                     <b-form-group id="input-group-3" label="Number of pages:" label-for="input-3">
@@ -66,8 +65,6 @@
                             required
                         ></b-form-input>
                     </b-form-group>
-
-                    <!-- <b-button type="submit" variant="primary">Submit</b-button> -->
                 </b-form>
             </b-modal>
         </div>
@@ -76,12 +73,10 @@
 
 <script>
 import AddBook from './AddBook.vue';
-import EditBook from './EditBook.vue';
 
 export default {
     components: {
         AddBook,
-        EditBook,
     },
     data() {
         return {
@@ -91,55 +86,136 @@ export default {
             rows: 1,
             fields: ['id', 'book_name', 'author_name', 'number_of_pages', 'actions'],
             books: [],
+            filter: null,
+            output: null,
+
             // Form Data
             form: {
                 id: '',
                 book_name: '',
-                author_name: '',
                 number_of_pages: 0,
+                author: {},
             },
-            filter: null,
-            output: null,
+
+            // Authors Array
+            authors: [],
         };
     },
     mounted() {
+        this.getAuthors();
         this.getBooks();
-        this.books = this.$store.state.books;
-        this.rows = this.books.length;
     },
     methods: {
         onFiltered(filteredItems) {
             this.rows = filteredItems.length;
             this.currentPage = 1;
         },
-        async getBooks() {
-            // const response = await this.$axios.get('/books');
-            // this.$store.commit('ALL_BOOKS', response.data);
+
+        // Function to get authors from database
+        async getAuthors() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.get('/authors', {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    this.$store.commit('ALL_AUTHORS', response.data);
+                    this.authors = response.data;
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
+
+        // Function to get books from database
+        async getBooks() {
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.get('/books', {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    this.$store.commit('ALL_BOOKS', response.data);
+                    this.books = response.data;
+                    this.rows = response.data.length;
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        },
+
         async updateModal(book) {
             this.form.id = book.id;
             this.form.book_name = book.book_name;
-            this.form.author_name = book.author_name;
             this.form.number_of_pages = book.number_of_pages;
         },
         async updateBook() {
-            const data = {
-                id: this.form.id,
-                book_name: this.form.book_name,
-                author_name: this.form.author_name,
-                number_of_pages: this.form.number_of_pages,
-            };
-            console.log(data);
-            // const response = await this.$axios.update(`/update-author/${data.id}`, data);
-            // console.log(response);
+            try {
+                const data = {
+                    id: this.form.id,
+                    book_name: this.form.book_name,
+                    number_of_pages: this.form.number_of_pages,
+                    author_id: this.form.author.item.id,
+                    author_name: this.form.author.item.author_name,
+                };
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.put(`/update-book`, data, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'multipart/form-data',
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if ((response.status = 200)) {
+                        this.form.id = '';
+                        this.form.book_name = '';
+                        this.form.number_of_pages = '';
+                        this.form.author = {};
+                    } else {
+                        this.$router.push({ path: '/' });
+                    }
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
-        deteleBook(book) {
-            const data = {
-                id: book.id,
-            };
-            // const response = await this.$axios.delete(`/delete-book/${data.id}`);
-            // console.log(response);
-            this.$store.commit('DELETE_BOOK', data);
+
+        // Funtion to delete book
+        async deteleBook(book) {
+            if (confirm('Are you sure to delete book?') === true) {
+                const data = {
+                    id: book.id,
+                };
+                try {
+                    const token = localStorage.getItem('access_token');
+                    if (token !== undefined) {
+                        const response = await this.$axios.delete(`/delete-book`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                Accept: 'multipart/form-data',
+                                'Content-Type': 'application/json',
+                            },
+                            data,
+                        });
+                        if ((response.status = 200)) {
+                            return true;
+                        } else {
+                            this.$router.push({ path: '/' });
+                        }
+                    } else {
+                        this.$router.push({ path: '/' });
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
         },
     },
 };

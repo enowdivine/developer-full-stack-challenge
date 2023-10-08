@@ -26,9 +26,8 @@ export default {
     data() {
         return {
             form: {
-                id: Math.random(),
                 author_name: '',
-                number_of_books: 43,
+                number_of_books: 0,
             },
             show: false,
         };
@@ -40,14 +39,30 @@ export default {
                 this.show = true;
             }
             const data = {
-                id: this.form.id,
                 author_name: this.form.author_name,
                 number_of_books: this.form.number_of_books,
             };
-            // const response = await this.$axios.post('/add-author', data);
-            // console.log(response);
-            this.$store.commit('ADD_AUTHOR', data);
-            this.form.author_name = '';
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.post('/add-author', data, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'multipart/form-data',
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if ((response.status = 200)) {
+                        this.$store.commit('ADD_AUTHOR', data);
+                        this.form.author_name = '';
+                        this.form.number_of_books = 0;
+                    }
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
     },
 };

@@ -6,7 +6,7 @@ booksTable = Table(
     "booksTable",
     meta,
     Column("id", INTEGER, primary_key=True),
-    Column("user_id", INTEGER, nullable=False),
+    Column("author_id", INTEGER, nullable=False),
     Column("book_name", String(16), nullable=False),
     Column("author_name", String(16), nullable=False),
     Column("number_of_pages", INTEGER, nullable=False),

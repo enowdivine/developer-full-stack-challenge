@@ -1,52 +1,88 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Body
+from typing import Any
 from config.db import connection
-from models.book import booksTable
+from schemas.user import UserSchema
 from schemas.book import BookSchema
+from auth.auth import get_current_active_user
+from fastapi import Depends
+from . import utils
 
 book_router = APIRouter()
 
 
 @book_router.get("/books")
-def fetch_book():
-    return connection.execute(booksTable.select()).fetchall()
+def fetch_books(user: UserSchema = Depends(get_current_active_user)):
+    cursor = connection.cursor()
+    result = cursor.execute(
+        """
+    SELECT * FROM booksTable
+    """
+    ).fetchall()
+    data = utils.format_result(cursor=cursor, result=result)
+    return data
 
 
-@book_router.post("/add-book")
-def add_book(book: BookSchema):
-    connection.execute(
-        booksTable.insert().values(
-            user_id=book.user_id,
-            book_name=book.book_name,
-            author_name=book.author_name,
-            number_of_pages=book.number_of_pages,
-        )
+@book_router.post("/add-book", response_model=BookSchema)
+def add_book(payload: BookSchema, user: UserSchema = Depends(get_current_active_user)):
+    print(payload)
+    cursor = connection.cursor()
+    cursor.execute(
+        f"""
+    INSERT INTO booksTable (author_id, book_name, author_name, number_of_pages)
+    VALUES (?, ?, ?, ?);
+    """,
+        (
+            payload.author_id,
+            payload.book_name,
+            payload.author_name,
+            payload.number_of_pages,
+        ),
     )
-    return connection.execute(booksTable.select()).fetchall()
+    connection.commit()
+    return {
+        "book_name": payload.book_name,
+        "author_id": payload.author_id,
+        "author_name": payload.author_name,
+        "number_of_pages": payload.number_of_pages,
+    }
 
 
-@book_router.put("/update-book/{bookId}")
-def update_book(book: BookSchema, bookId: int):
-    connection.execute(
-        booksTable.update()
-        .values(
-            book_name=book.book_name,
-            author_name=book.author_name,
-            number_of_pages=book.number_of_pages,
-        )
-        .where(booksTable.c.id == bookId)
+@book_router.put("/update-book")
+def update_book(
+    payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)
+):
+    book_id = payload["id"]
+    author_id = payload["author_id"]
+    book_name = payload["book_name"]
+    author_name = payload["author_name"]
+    number_of_pages = payload["number_of_pages"]
+
+    cursor = connection.cursor()
+    cursor.execute(
+        f"""
+    UPDATE booksTable
+    SET book_name = '{book_name}', author_id = {author_id}, author_name = '{author_name}', number_of_pages = '{number_of_pages}' 
+    WHERE id = {book_id}
+    """
     )
-    return connection.execute(
-        booksTable.select().where(
-            booksTable.c.id == bookId,
-        )
-    )
+    connection.commit()
+    return {
+        "book_name": book_name,
+        "author_name": author_name,
+        "number_of_pages": number_of_pages,
+    }
 
 
-@book_router.delete("/delete-book/{bookId}")
-def delete_book(book: BookSchema, bookId: int):
-    connection.execute(booksTable.delete().where(booksTable.c.id == bookId))
-    return connection.execute(
-        booksTable.select().where(
-            booksTable.c.id == bookId,
-        )
+@book_router.delete("/delete-book")
+def delete_book(
+    payload: Any = Body(None), user: UserSchema = Depends(get_current_active_user)
+):
+    book_id = payload["id"]
+    cursor = connection.cursor()
+    cursor.execute(
+        f"""
+    DELETE FROM booksTable WHERE id={book_id}
+    """
     )
+    connection.commit()
+    return True

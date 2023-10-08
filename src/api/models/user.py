@@ -1,4 +1,4 @@
-from sqlalchemy import INTEGER, Column, String, Table
+from sqlalchemy import INTEGER, Boolean, Column, String, Table
 from config.db import meta, engine
 
 usersTable = Table(

@@ -38,12 +38,34 @@ export default {
             show: true,
         };
     },
+
     methods: {
-        onSubmit(event) {
+        async onSubmit(event) {
             event.preventDefault();
-            console.log(this.form.username, this.form.password);
-            this.$router.push({ path: 'books' });
+            if (this.form.username && this.form.password) {
+                const data = new FormData();
+                data.append('username', this.form.username);
+                data.append('password', this.form.password);
+                try {
+                    const response = await this.$axios.post('/token', data, {
+                        headers: {
+                            Accept: 'multipart/form-data',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                    });
+                    if ((response.status = 200)) {
+                        this.$store.commit('LOGIN', response.data);
+                        this.$router.push({ path: 'authors' });
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            } else {
+                this.error = true;
+            }
         },
     },
 };
 </script>
+
+password1234

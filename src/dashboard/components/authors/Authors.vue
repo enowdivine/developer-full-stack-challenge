@@ -42,7 +42,7 @@
                     <b-form-group id="input-group-1" label="Author Name:" label-for="input-1">
                         <b-form-input
                             id="input-1"
-                            v-model="updateForm.author_name"
+                            v-model="form.author_name"
                             placeholder="Enter author name"
                             required
                         ></b-form-input>
@@ -69,11 +69,9 @@ export default {
             authors: [],
             // Form Data
             form: {
+                author_id: '',
                 author_name: '',
                 number_of_books: 0,
-            },
-            updateForm: {
-                author_name: '',
             },
             filter: null,
             output: null,
@@ -81,37 +79,103 @@ export default {
     },
     mounted() {
         this.getAuthors();
-        this.authors = this.$store.state.authors;
-        this.rows = this.authors.length;
     },
     methods: {
         onFiltered(filteredItems) {
             this.rows = filteredItems.length;
             this.currentPage = 1;
         },
+
+        // Function to get authors from database
         async getAuthors() {
-            // const response = await this.$axios.get('/authors');
-            // this.$store.commit('ALL_AUTHORS', response.data);
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.get('/authors', {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    response.data.map(async (item) => {
+                        const res = await this.$axios.get(`/author-books/${item.id}`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        item.number_of_books = res.data.length;
+                        this.authors.unshift(item);
+                        return;
+                    });
+                    this.rows = response.data.length;
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
+
+        // Function to set initial variables for author during update
         async updateModal(author) {
-            this.updateForm.author_name = author.author_name;
+            this.form.author_id = author.id;
+            this.form.author_name = author.author_name;
         },
+
+        // Function to update author
         async updateAuthor() {
             const data = {
-                id: author.id,
-                author_name: this.updateForm.author_name,
+                id: this.form.author_id,
+                author_name: this.form.author_name,
             };
-            console.log(data);
-            // const response = await this.$axios.update(`/update-author/${data.id}`, data);
-            // console.log(response);
+            try {
+                const token = localStorage.getItem('access_token');
+                if (token !== undefined) {
+                    const response = await this.$axios.put(`/update-author`, data, {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            Accept: 'multipart/form-data',
+                            'Content-Type': 'application/json',
+                        },
+                    });
+                    if ((response.status = 200)) {
+                        this.form.author_id = '';
+                        this.form.author_name = '';
+                    } else {
+                        this.$router.push({ path: '/' });
+                    }
+                } else {
+                    this.$router.push({ path: '/' });
+                }
+            } catch (error) {
+                console.error(error);
+            }
         },
+
+        // Function to delete author
         async deteleAuthor(author) {
-            const data = {
-                id: author.id,
-            };
-            // const response = await this.$axios.delete(`/delete-author/${data.id}`);
-            // console.log(response);
-            this.$store.commit('DELETE_AUTHOR', data);
+            if (confirm('Are you sure to delete author?') === true) {
+                const data = {
+                    id: author.id,
+                };
+                try {
+                    const token = localStorage.getItem('access_token');
+                    if (token !== undefined) {
+                        const response = await this.$axios.delete(`/delete-author`, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                Accept: 'multipart/form-data',
+                                'Content-Type': 'application/json',
+                            },
+                            data,
+                        });
+                        if ((response.status = 200)) {
+                            return true;
+                        } else {
+                            this.$router.push({ path: '/' });
+                        }
+                    } else {
+                        this.$router.push({ path: '/' });
+                    }
+                } catch (error) {
+                    console.error(error);
+                }
+            }
         },
     },
 };

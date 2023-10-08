@@ -1,62 +1,18 @@
 export const state = () => ({
     user: {},
-    authors: [
-        {
-            id: 1,
-            author_name: 'James cameron',
-            number_of_books: 1,
-        },
-        {
-            id: 2,
-            author_name: 'Mike Scott',
-            number_of_books: 1,
-        },
-        {
-            id: 3,
-            author_name: 'Fred Humphry',
-            number_of_books: 1,
-        },
-        {
-            id: 4,
-            author_name: 'Tom Craiges',
-            number_of_books: 1,
-        },
-    ],
-    books: [
-        {
-            id: 1,
-            book_name: 'Meet Uncle Dave',
-            author_name: 'Fred Humphry',
-            number_of_pages: 3397,
-        },
-        {
-            id: 2,
-            book_name: 'Grumpy Bear',
-            author_name: 'Mike Scott',
-            number_of_pages: 4467,
-        },
-        {
-            id: 3,
-            book_name: 'Jungle Josh',
-            author_name: 'Fred Humphry',
-            number_of_pages: 3397,
-        },
-        {
-            id: 4,
-            book_name: 'Forest gump',
-            author_name: 'Mike Scott',
-            number_of_pages: 4467,
-        },
-    ],
+    authors: [],
+    books: [],
 });
 
 export const mutations = {
     // User Mutations
-    LOGIN: (state: { user: Object }, data: Object) => {
+    LOGIN: (state: { user: any }, data: any) => {
         state.user = data;
+        localStorage.setItem('access_token', data.access_token);
     },
     LOGOUT: (state: { user: Object }, data: Object) => {
         state.user = {};
+        localStorage.removeItem('access_token');
     },
 
     // Authors Mutations
@@ -65,9 +21,6 @@ export const mutations = {
     },
     ADD_AUTHOR: (state: { authors: any[] }, data: Object) => {
         state.authors.unshift(data);
-    },
-    DELETE_AUTHOR: (state: { authors: any[] }, data: Object) => {
-        state.authors.splice(state.authors.indexOf(data), 1);
     },
 
     // Books Mutations
