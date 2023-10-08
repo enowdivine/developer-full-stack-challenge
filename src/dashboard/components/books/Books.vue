@@ -115,13 +115,13 @@ export default {
         async getAuthors() {
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.get('/authors', {
                         headers: { Authorization: `Bearer ${token}` },
                     });
-                    this.$store.commit('ALL_AUTHORS', response.data);
                     this.authors = response.data;
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {
@@ -133,14 +133,14 @@ export default {
         async getBooks() {
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.get('/books', {
                         headers: { Authorization: `Bearer ${token}` },
                     });
-                    this.$store.commit('ALL_BOOKS', response.data);
                     this.books = response.data;
                     this.rows = response.data.length;
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {
@@ -162,27 +162,35 @@ export default {
                     author_id: this.form.author.item.id,
                     author_name: this.form.author.item.author_name,
                 };
-                const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
-                    const response = await this.$axios.put(`/update-book`, data, {
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            Accept: 'multipart/form-data',
-                            'Content-Type': 'application/json',
-                        },
-                    });
-                    if ((response.status = 200)) {
-                        this.form.id = '';
-                        this.form.book_name = '';
-                        this.form.number_of_pages = '';
-                        this.form.author = {};
+                if (data.id && data.author_id && data.book_name && data.author_name && data.number_of_pages) {
+                    const token = localStorage.getItem('access_token');
+                    if (token !== null) {
+                        const response = await this.$axios.put(`/update-book`, data, {
+                            headers: {
+                                Authorization: `Bearer ${token}`,
+                                Accept: 'multipart/form-data',
+                                'Content-Type': 'application/json',
+                            },
+                        });
+                        if ((response.status = 200)) {
+                            this.$toast.success('Book updated', { duration: 5000 });
+                            this.form.id = '';
+                            this.form.book_name = '';
+                            this.form.number_of_pages = '';
+                            this.form.author = {};
+                        } else {
+                            this.$toast.error('Not Authorized', { duration: 5000 });
+                            this.$router.push({ path: '/' });
+                        }
                     } else {
+                        this.$toast.error('Not Authorized', { duration: 5000 });
                         this.$router.push({ path: '/' });
                     }
                 } else {
-                    this.$router.push({ path: '/' });
+                    this.$toast.error('Check all fields', { duration: 5000 });
                 }
             } catch (error) {
+                this.$toast.error('An error occured', { duration: 5000 });
                 console.error(error);
             }
         },
@@ -195,7 +203,7 @@ export default {
                 };
                 try {
                     const token = localStorage.getItem('access_token');
-                    if (token !== undefined) {
+                    if (token !== null) {
                         const response = await this.$axios.delete(`/delete-book`, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -205,14 +213,18 @@ export default {
                             data,
                         });
                         if ((response.status = 200)) {
+                            this.$toast.success('Book deleted', { duration: 5000 });
                             return true;
                         } else {
+                            this.$toast.error('Not Authorized', { duration: 5000 });
                             this.$router.push({ path: '/' });
                         }
                     } else {
+                        this.$toast.error('Not Authorized', { duration: 5000 });
                         this.$router.push({ path: '/' });
                     }
                 } catch (error) {
+                    this.$toast.error('An error occured', { duration: 5000 });
                     console.error(error);
                 }
             }

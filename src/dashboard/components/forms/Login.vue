@@ -54,10 +54,12 @@ export default {
                         },
                     });
                     if ((response.status = 200)) {
+                        this.$toast.success('Successfully authenticated', { duration: 5000 });
                         this.$store.commit('LOGIN', response.data);
                         this.$router.push({ path: 'authors' });
                     }
                 } catch (error) {
+                    this.$toast.error('Invalid Credentials', { duration: 5000 });
                     console.error(error);
                 }
             } else {

@@ -44,6 +44,8 @@ export default {
         ['bootstrap-vue/nuxt', { icons: true, css: true }],
         // https://go.nuxtjs.dev/axios
         '@nuxtjs/axios',
+        // https://www.npmjs.com/package/@nuxtjs/toast
+        '@nuxtjs/toast',
     ],
 
     publicRuntimeConfig: {
@@ -56,6 +58,21 @@ export default {
     axios: {
         // Workaround to avoid enforcing hard-coded localhost:3000: https://github.com/nuxt-community/axios-module/issues/308
         baseURL: process.env.NODE_ENV == 'development' ? 'http://127.0.0.1:8000' : process.env.BASEURL,
+    },
+
+    // Toast module configuration: https://www.npmjs.com/package/@nuxtjs/toast
+    toast: {
+        position: 'top-center',
+        register: [
+            // Register custom toasts
+            {
+                name: 'my-error',
+                message: 'Oops...Something went wrong',
+                options: {
+                    type: 'error',
+                },
+            },
+        ],
     },
 
     // Build Configuration: https://go.nuxtjs.dev/config-build

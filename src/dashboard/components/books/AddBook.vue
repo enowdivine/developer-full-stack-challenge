@@ -63,7 +63,7 @@ export default {
                         number_of_pages: this.form.number_of_pages,
                     };
                     const token = localStorage.getItem('access_token');
-                    if (token !== undefined) {
+                    if (token !== null) {
                         const response = await this.$axios.post('/add-book', data, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -72,21 +72,24 @@ export default {
                             },
                         });
                         if ((response.status = 200)) {
-                            this.$store.commit('ADD_BOOK', response.data);
+                            this.$toast.success('Book added', { duration: 5000 });
                             this.form.book_name = '';
                             this.form.author_name = '';
                             this.form.number_of_pages = 0;
                         } else {
+                            this.$toast.error('Not Authorized', { duration: 5000 });
                             this.$router.push({ path: '/' });
                         }
                     } else {
+                        this.$toast.error('Not Authorized', { duration: 5000 });
                         this.$router.push({ path: '/' });
                     }
                 } catch (error) {
+                    this.$toast.error('Check all fields', { duration: 5000 });
                     console.error(error);
                 }
             } else {
-                this.show = true;
+                this.$toast.error('Check all fields', { duration: 5000 });
             }
         },
 
@@ -94,13 +97,13 @@ export default {
         async getAuthors() {
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.get('/authors', {
                         headers: { Authorization: `Bearer ${token}` },
                     });
-                    this.$store.commit('ALL_AUTHORS', response.data);
                     this.authors = response.data;
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {

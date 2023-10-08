@@ -37,6 +37,7 @@ export default {
             event.preventDefault();
             if (this.form.author_name === '') {
                 this.show = true;
+                return;
             }
             const data = {
                 author_name: this.form.author_name,
@@ -44,7 +45,7 @@ export default {
             };
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.post('/add-author', data, {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -53,14 +54,16 @@ export default {
                         },
                     });
                     if ((response.status = 200)) {
-                        this.$store.commit('ADD_AUTHOR', data);
+                        this.$toast.success('Author added', { duration: 5000 });
                         this.form.author_name = '';
                         this.form.number_of_books = 0;
                     }
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {
+                this.$toast.error('Check all fields', { duration: 5000 });
                 console.error(error);
             }
         },

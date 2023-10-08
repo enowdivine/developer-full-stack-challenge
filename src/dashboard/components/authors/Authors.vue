@@ -90,7 +90,7 @@ export default {
         async getAuthors() {
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.get('/authors', {
                         headers: { Authorization: `Bearer ${token}` },
                     });
@@ -104,6 +104,7 @@ export default {
                     });
                     this.rows = response.data.length;
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {
@@ -119,13 +120,17 @@ export default {
 
         // Function to update author
         async updateAuthor() {
+            if (this.form.author_name === '') {
+                this.$toast.error('Add author name', { duration: 5000 });
+                return;
+            }
             const data = {
                 id: this.form.author_id,
                 author_name: this.form.author_name,
             };
             try {
                 const token = localStorage.getItem('access_token');
-                if (token !== undefined) {
+                if (token !== null) {
                     const response = await this.$axios.put(`/update-author`, data, {
                         headers: {
                             Authorization: `Bearer ${token}`,
@@ -134,15 +139,19 @@ export default {
                         },
                     });
                     if ((response.status = 200)) {
+                        this.$toast.success('Author updated', { duration: 5000 });
                         this.form.author_id = '';
                         this.form.author_name = '';
                     } else {
+                        this.$toast.error('Not Authorized', { duration: 5000 });
                         this.$router.push({ path: '/' });
                     }
                 } else {
+                    this.$toast.error('Not Authorized', { duration: 5000 });
                     this.$router.push({ path: '/' });
                 }
             } catch (error) {
+                this.$toast.success('Check all fields', { duration: 5000 });
                 console.error(error);
             }
         },
@@ -155,7 +164,7 @@ export default {
                 };
                 try {
                     const token = localStorage.getItem('access_token');
-                    if (token !== undefined) {
+                    if (token !== null) {
                         const response = await this.$axios.delete(`/delete-author`, {
                             headers: {
                                 Authorization: `Bearer ${token}`,
@@ -165,14 +174,18 @@ export default {
                             data,
                         });
                         if ((response.status = 200)) {
+                            this.$toast.success('Author deleted', { duration: 5000 });
                             return true;
                         } else {
+                            this.$toast.error('Not Authorized', { duration: 5000 });
                             this.$router.push({ path: '/' });
                         }
                     } else {
+                        this.$toast.error('Not Authorized', { duration: 5000 });
                         this.$router.push({ path: '/' });
                     }
                 } catch (error) {
+                    this.$toast.error('An error occured', { duration: 5000 });
                     console.error(error);
                 }
             }
